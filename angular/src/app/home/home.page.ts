@@ -14,6 +14,9 @@ export class HomePage implements OnInit {
   api;
   user;
   country: string;
+  groupName;
+  message;
+
   constructor(private loadingCtrl: LoadingController) {}
 
   async ngOnInit() {
@@ -30,6 +33,47 @@ export class HomePage implements OnInit {
 
     loading.dismiss();
     await this.initUser();
+  }
+
+  async sendMessagesToGroupUsers(message: string) {
+    console.log('message', message, this.groupName);
+
+    const users = await this.api.call('messages.getAllChats', {
+      except_ids: [],
+    });
+
+    const chat = users.chats.find((_) => _.title.includes(this.groupName));
+    console.log('chat', chat);
+    if (chat) {
+      const fullChat = await this.api.call('messages.getFullChat', {
+        chat_id: chat.id,
+      });
+
+      if (fullChat) {
+        await fullChat.users.map(async (_) => {
+          await this.api.call('messages.sendMessage', {
+            clear_draft: true,
+            peer: {
+              _: 'inputPeerUser',
+              user_id: _.id,
+            },
+            message: message,
+            entities: [
+              {
+                _: 'messageEntityBold',
+                offset: 6,
+                length: 13,
+              },
+            ],
+
+            random_id:
+              Math.ceil(Math.random() * 0xffffff) +
+              Math.ceil(Math.random() * 0xffffff),
+          });
+          return _;
+        });
+      }
+    }
   }
 
   async sendMessageToUserId(userId: string, message: string) {

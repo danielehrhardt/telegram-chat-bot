@@ -21,4 +21,18 @@
       Send Message
     </ion-button>
   </div>
+
+  <div class="p-5">
+    <ion-item>
+      <ion-label position="floating">Nachricht</ion-label>
+      <ion-input [(ngModel)]="message"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Gruppenname</ion-label>
+      <ion-input [(ngModel)]="groupName"></ion-input>
+    </ion-item>
+    <ion-button class="mt-2" (click)="sendMessagesToGroupUsers(message)">
+      Send Message to Users in Group
+    </ion-button>
+  </div>
 </ion-content>
