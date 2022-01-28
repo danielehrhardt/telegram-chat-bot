@@ -16,6 +16,8 @@ export class HomePage implements OnInit {
   country: string;
   groupName;
   message;
+  chats;
+  selectedChat;
 
   constructor(private loadingCtrl: LoadingController) {}
 
@@ -32,42 +34,40 @@ export class HomePage implements OnInit {
     this.country = result.country;
 
     loading.dismiss();
+
     await this.initUser();
   }
 
-  async sendMessagesToGroupUsers(message: string) {
-    console.log('message', message, this.groupName);
-
+  async findGroup() {
     const users = await this.api.call('messages.getAllChats', {
       except_ids: [],
     });
+    // console.log('users.chats', users.chats);
 
-    const chat = users.chats.find((_) => _.title.includes(this.groupName));
-    console.log('chat', chat);
-    if (chat) {
+    const chats = users.chats.filter((_) => _.title.includes(this.groupName));
+    console.log('chats', chats);
+    this.chats = chats;
+  }
+
+  async sendMessageToGroup() {
+    if (this.selectedChat) {
       const fullChat = await this.api.call('messages.getFullChat', {
-        chat_id: chat.id,
+        chat_id: this.selectedChat,
       });
+
+      console.log('fullChat', fullChat);
 
       if (fullChat) {
         await Promise.all(
           fullChat.users.map(async (_) => {
-            console.log('sendMessage -> ', _, message);
+            console.log('sendMessage -> ', _, this.message);
             await this.api.call('messages.sendMessage', {
               clear_draft: true,
               peer: {
                 _: 'inputPeerUser',
                 user_id: _.id,
               },
-              message: message,
-              entities: [
-                {
-                  _: 'messageEntityBold',
-                  offset: 6,
-                  length: 13,
-                },
-              ],
-
+              message: this.message,
               random_id:
                 Math.ceil(Math.random() * 0xffffff) +
                 Math.ceil(Math.random() * 0xffffff),
