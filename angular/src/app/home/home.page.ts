@@ -50,6 +50,10 @@ export class HomePage implements OnInit {
   }
 
   async sendMessageToGroup() {
+    const loading = await this.loadingCtrl.create({
+      message: 'Sending messages...',
+    });
+    loading.present();
     if (this.selectedChat) {
       const fullChat = await this.api.call('messages.getFullChat', {
         chat_id: this.selectedChat,
@@ -78,6 +82,7 @@ export class HomePage implements OnInit {
         );
       }
     }
+    loading.dismiss();
   }
 
   async sleep(milliseconds) {
