@@ -25,5 +25,5 @@ jobs:
           server: server01.codext.de
           username: ${{ secrets.ftp_user }}
           password: ${{ secrets.ftp_password }}
-          local-dir: ./www/
+          local-dir: ./angular/www/
           server-dir: ./
