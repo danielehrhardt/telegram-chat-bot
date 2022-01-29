@@ -2,9 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
 import MTProto from '@mtproto/core/envs/browser';
 
-const api_id = '10370817';
-const api_hash = '6f541bce03b3699c9eade214311b475b';
-
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -21,7 +18,26 @@ export class HomePage implements OnInit {
 
   constructor(private loadingCtrl: LoadingController) {}
 
+  clear() {
+    localStorage.removeItem('api_id');
+    localStorage.removeItem('api_hash');
+  }
+
   async ngOnInit() {
+    let api_id = localStorage.getItem('api_id');
+    let api_hash = localStorage.getItem('api_hash');
+
+    if (!api_id && !api_hash) {
+      await alert(
+        'Gehe auf folgende Website: https://my.telegram.org/apps erstelle eine neue App und drücke anschließend auf Ok'
+      );
+      api_id = await prompt('Kopiere nun die Api ID hier rein: ');
+      localStorage.setItem('api_id', api_id);
+
+      api_hash = await prompt('Kopiere nun die Api Hash hier rein: ');
+      localStorage.setItem('api_hash', api_hash);
+    }
+
     const loading = await this.loadingCtrl.create();
     loading.present();
 
@@ -126,6 +142,7 @@ export class HomePage implements OnInit {
           return;
         }
       }
+      location.reload();
     } else {
       this.user = user;
       console.log('user:', user);
