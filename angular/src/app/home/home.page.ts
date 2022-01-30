@@ -69,34 +69,56 @@ export class HomePage implements OnInit {
     const loading = await this.loadingCtrl.create({
       message: 'Sending messages...',
     });
-    loading.present();
+    // loading.present();
     if (this.selectedChat) {
-      const fullChat = await this.api.call('messages.getFullChat', {
-        chat_id: this.selectedChat,
-      });
+      let fullChat;
+      if (this.selectedChat._ == 'chat') {
+        fullChat = await this.api.call('messages.getFullChat', {
+          chat_id: this.selectedChat.id,
+          access_hash: this.selectedChat.access_hash,
+        });
+      }
 
-      console.log('fullChat', fullChat);
-
+      if (this.selectedChat._ == 'channel') {
+        const config = {
+          _: 'inputChannel',
+          channel_id: this.selectedChat.id,
+          access_hash: this.selectedChat.access_hash,
+        };
+        console.log('getFullChannel', this.selectedChat, config);
+        try {
+          fullChat = await this.api.call('channels.getFullChannel', config);
+        } catch (error) {
+          console.log('error', error);
+        }
+      }
+      console.log('fullChat', fullChat, this.selectedChat);
+      return;
       if (fullChat) {
-        await Promise.all(
-          fullChat.users.map(async (_) => {
-            console.log('sendMessage -> ', _, this.message);
-            await this.api.call('messages.sendMessage', {
-              clear_draft: true,
-              peer: {
-                _: 'inputPeerUser',
-                user_id: _.id,
-                access_hash: _.access_hash,
-              },
-              message: this.message,
-              random_id:
-                Math.ceil(Math.random() * 0xffffff) +
-                Math.ceil(Math.random() * 0xffffff),
-            });
-            await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
-            return _;
-          })
-        );
+        try {
+          await Promise.all(
+            fullChat.users.map(async (_) => {
+              console.log('sendMessage -> ', _, this.message);
+              await this.api.call('messages.sendMessage', {
+                clear_draft: true,
+                peer: {
+                  _: 'inputPeerUser',
+                  user_id: _.id,
+                  access_hash: _.access_hash,
+                },
+                message: this.message,
+                random_id:
+                  Math.ceil(Math.random() * 0xffffff) +
+                  Math.ceil(Math.random() * 0xffffff),
+              });
+              await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
+              return _;
+            })
+          );
+        } catch (error) {
+        } finally {
+          loading.dismiss();
+        }
       }
     }
     loading.dismiss();

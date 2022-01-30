@@ -28,10 +28,10 @@
       <ion-label position="floating">Gruppenname</ion-label>
       <ion-input [(ngModel)]="groupName"></ion-input>
     </ion-item>
-    <ion-button class="mt-2" (click)="findGroup()"> Find Group </ion-button>
+    <ion-button class="mt-2" (click)="findGroup()"> Gruppe findene </ion-button>
 
     {{selectedChat}}
-    <ion-list class="rounded-lg overflow-hidden">
+    <ion-list *ngIf="chats?.length > 0">
       <ion-radio-group [(ngModel)]="selectedChat">
         <ion-list-header>
           <ion-label>Gruppen</ion-label>
@@ -39,20 +39,26 @@
 
         <ion-item *ngFor="let chat of chats">
           <ion-label>{{chat.title}}</ion-label>
-          <ion-radio slot="start" [value]="chat.id"></ion-radio>
+          <ion-radio slot="start" [value]="chat"></ion-radio>
         </ion-item>
       </ion-radio-group>
     </ion-list>
 
-    <ion-item>
-      <ion-label position="floating">Nachricht</ion-label>
-      <ion-input [(ngModel)]="message"></ion-input>
-    </ion-item>
+    <ion-list>
+      <ion-item>
+        <ion-label position="floating">Nachricht</ion-label>
+        <ion-textarea [(ngModel)]="message"></ion-textarea>
+      </ion-item>
+    </ion-list>
 
     <ion-button class="mt-2" (click)="sendMessageToGroup()">
       Send Message to Users in Group
     </ion-button>
   </div>
-
-  <ion-button (click)="clear()">Ausloggen</ion-button>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar class="px-3 flex items-center justify-end">
+    <ion-button (click)="clear()">Ausloggen</ion-button>
+  </ion-toolbar>
+</ion-footer>
