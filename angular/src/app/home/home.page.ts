@@ -86,6 +86,7 @@ export class HomePage implements OnInit {
               peer: {
                 _: 'inputPeerUser',
                 user_id: _.id,
+                access_hash: _.access_hash,
               },
               message: this.message,
               random_id:
