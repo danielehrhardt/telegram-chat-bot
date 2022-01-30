@@ -16,11 +16,11 @@
     <h2>Benutzer: {{user?.user?.first_name}} {{user?.user?.last_name}}</h2>
   </div>
 
-  <div class="p-5">
+  <!--<div class="p-5">
     <ion-button (click)="sendMessageToUserId('1101809882', 'Hallo Hannes')">
       Send Message
     </ion-button>
-  </div>
+  </div>-->
 
   <div class="p-5">
     <ion-item>
@@ -30,7 +30,7 @@
     <ion-button class="mt-2" (click)="findGroup()"> Find Group </ion-button>
 
     {{selectedChat}}
-    <ion-list>
+    <ion-list class="rounded-lg overflow-hidden">
       <ion-radio-group [(ngModel)]="selectedChat">
         <ion-list-header>
           <ion-label>Gruppen</ion-label>
