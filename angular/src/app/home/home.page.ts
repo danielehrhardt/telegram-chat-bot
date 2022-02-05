@@ -14,6 +14,7 @@ export class HomePage implements OnInit {
   country: string;
   groupName;
   message;
+  messagesPerMinute = 2;
   chats;
   selectedChat;
   participants = [];
@@ -60,6 +61,7 @@ export class HomePage implements OnInit {
       const result = await this.api.call('help.getNearestDc');
       this.country = result.country;
     } catch (error) {
+      await this.handleError(error);
       console.log('ngOnInit error', error);
       this.clear();
     }
@@ -76,6 +78,7 @@ export class HomePage implements OnInit {
       this.chats = chats;
       console.log('this.chats', this.chats);
     } catch (error) {
+      await this.handleError(error);
       console.log('findGroup', error);
       let toast = await this.toastCtrl.create({
         message: error.message,
@@ -137,6 +140,7 @@ export class HomePage implements OnInit {
         participants.users.forEach((u) => this.participants.push(u));
       }
     } catch (e) {
+      await this.handleError(e);
       console.log('Too many requests?', e);
     }
 
@@ -145,6 +149,9 @@ export class HomePage implements OnInit {
 
   async sendMessageToUsers() {
     console.log(this.participants);
+    if (+this.messagesPerMinute < 1) {
+      return alert('Bitte mindestens 1 Nachricht pro Minute versenden!');
+    }
     const loading = await this.loadingCtrl.create({
       message: 'Sending messages...',
     });
@@ -177,7 +184,7 @@ export class HomePage implements OnInit {
             _.status = 'error';
             _.error = JSON.stringify(error);
           }
-          // await this.sleep((Math.floor(Math.random() * 10) + 1) * 1000);
+          await this.sleep(60_000 / +this.messagesPerMinute);
         } else {
           _.status = 'warning';
           _.error = 'User already in chat';
@@ -185,6 +192,7 @@ export class HomePage implements OnInit {
         _.loading = false;
       });
     } catch (error) {
+      await this.handleError(error);
       console.log('sendMessageToUsers', error);
     } finally {
       loading.dismiss();
@@ -215,6 +223,7 @@ export class HomePage implements OnInit {
             },
           });
         } catch (error) {
+          await this.handleError(error);
           console.log('error', error);
         }
       }
@@ -255,6 +264,7 @@ export class HomePage implements OnInit {
           phone_code_hash,
         });
       } catch (error) {
+        await this.handleError(error);
         console.log('error', error);
       }
     } else {
@@ -273,6 +283,7 @@ export class HomePage implements OnInit {
 
       return user;
     } catch (error) {
+      await this.handleError(error);
       // this.clear();
       return null;
     }
@@ -296,6 +307,7 @@ export class HomePage implements OnInit {
         }
       } catch (error) {
         resolve(false);
+        await this.handleError(error);
       }
     });
   }
@@ -322,9 +334,24 @@ export class HomePage implements OnInit {
       await callback(array[index], index, array);
     }
   }
-  scrollTo(elm) {
+
+  async scrollTo(elm) {
     const y = elm.el.offsetTop + 400;
 
-    this.content.scrollToPoint(0, y);
+    await this.content.scrollToPoint(0, y);
+  }
+
+  async handleError(err) {
+    if (err?._ === 'mt_rpc_error' && err?.error_message?.match(/FLOOD_WAIT_/)) {
+      const wait = Number(err.error_message.match(/\d+/g)[0]);
+      const loading = await this.loadingCtrl.create({ message: `Flood Wait ... ${wait} Sekunden`, duration: wait * 1000 });
+      await loading.present();
+      for(let i = 1; i < wait; i++) {
+        await this.sleep(1000);
+        loading.message = `Flood Wait ... ${wait - i} Sekunden`;
+      }
+      await loading.dismiss();
+      return true;
+    }
   }
 }

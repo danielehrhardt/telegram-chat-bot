@@ -47,9 +47,14 @@
         style="background: #1a1a1a"
       >
         <div class="card-body">
-          <ion-item class="mb-10">
+          <ion-item class="mb-1">
             <ion-label position="floating">Nachricht</ion-label>
             <ion-textarea [(ngModel)]="message"></ion-textarea>
+          </ion-item>
+
+          <ion-item class="mb-10">
+            <ion-label position="floating">Wie viele Nachrichten pro Minute?</ion-label>
+            <ion-input type="number" [(ngModel)]="messagesPerMinute"></ion-input>
           </ion-item>
 
           <ion-item>
@@ -60,6 +65,7 @@
             class="btn mt-2"
             [disabled]="!groupName"
             (click)="findGroup()"
+            style="color: #fff"
           >
             Gruppe finden
           </button>
@@ -172,9 +178,9 @@
             </ion-radio-group>
           </ion-list>
 
-          <ng-container *ngIf="participants?.length > 0">
+          <ng-container *ngIf="participants?.length">
             <button
-              [disabled]="participants?.length === 0 || !message"
+              [disabled]="!participants?.length || !message"
               class="btn mt-2"
               (click)="sendMessageToUsers()"
             >
