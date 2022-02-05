@@ -143,6 +143,7 @@ export class HomePage implements OnInit {
     const loading = await this.loadingCtrl.create({
       message: 'Sending messages...',
     });
+    loading.present();
     try {
       await Promise.all(
         this.participants.map(async (_) => {
