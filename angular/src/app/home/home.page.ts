@@ -273,6 +273,8 @@ export class HomePage implements OnInit {
 
       return user;
     } catch (error) {
+      this.clear();
+      location.reload();
       return null;
     }
   }
