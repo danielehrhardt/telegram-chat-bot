@@ -15,7 +15,7 @@ export class HomePage implements OnInit {
   message;
   chats;
   selectedChat;
-  participants;
+  participants = [];
   count;
   fullChannel;
 
@@ -69,59 +69,58 @@ export class HomePage implements OnInit {
   }
 
   async loadChannel() {
-    const fullChannel = await this.api.call('channels.getFullChannel', {
-      channel: {
-        _: 'inputChannel',
-        channel_id: this.selectedChat.id,
+    this.participants = [];
+    delete this.fullChannel;
+    if (this.selectedChat._ == 'chat') {
+      const fullChat = await this.api.call('messages.getFullChat', {
+        chat_id: this.selectedChat.id,
         access_hash: this.selectedChat.access_hash,
-      },
-    });
-    this.fullChannel = fullChannel;
-    console.log('fullChannel', fullChannel);
+      });
+      this.participants = fullChat.users;
+    }
+    if (this.selectedChat._ == 'channel') {
+      const fullChannel = await this.api.call('channels.getFullChannel', {
+        channel: {
+          _: 'inputChannel',
+          channel_id: this.selectedChat.id,
+          access_hash: this.selectedChat.access_hash,
+        },
+      });
+      this.fullChannel = fullChannel;
+    }
   }
 
   async getParticipants(count = 10, search = '') {
-    if (this.selectedChat._ == 'chat') {
-      this.participants = (
-        await this.api.call('messages.getFullChat', {
-          chat_id: this.selectedChat.id,
-          access_hash: this.selectedChat.access_hash,
-        })
-      ).users;
-    } else if (this.selectedChat._ == 'channel') {
-      try {
-        const hash =
-          Math.ceil(Math.random() * 0xffffff) +
-          Math.ceil(Math.random() * 0xffffff);
-        this.participants = [];
-        try {
-          for (let counter = 1; this.participants.length < counter; ) {
-            console.log('Search', counter, this.participants.length);
-            let participants = await this.api.call('channels.getParticipants', {
-              channel: {
-                _: 'inputChannel',
-                channel_id: this.selectedChat.id,
-                access_hash: this.selectedChat.access_hash,
-              },
-              filter: {
-                _: 'channelParticipantsSearch',
-                q: search, // Suche nach ...
-              },
-              offset: this.participants.length,
-              limit: count,
-              hash,
-            });
-            if (counter === 1) {
-              counter = count || participants.count;
-            }
-            participants.users.forEach((u) => this.participants.push(u));
-          }
-        } catch (e) {
-          console.log('Too many requests?', e);
+    if (count > this.participants.length) {
+      count = this.participants.length;
+    }
+    const hash =
+      Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff);
+    this.participants = [];
+    try {
+      for (let counter = 1; this.participants.length < counter; ) {
+        console.log('Search', counter, this.participants.length);
+        let participants = await this.api.call('channels.getParticipants', {
+          channel: {
+            _: 'inputChannel',
+            channel_id: this.selectedChat.id,
+            access_hash: this.selectedChat.access_hash,
+          },
+          filter: {
+            _: 'channelParticipantsSearch',
+            q: search, // Suche nach ...
+          },
+          offset: this.participants.length,
+          limit: count,
+          hash,
+        });
+        if (counter === 1) {
+          counter = count || participants.count;
         }
-      } catch (error) {
-        console.log('error', error);
+        participants.users.forEach((u) => this.participants.push(u));
       }
+    } catch (e) {
+      console.log('Too many requests?', e);
     }
   }
 
@@ -183,34 +182,6 @@ export class HomePage implements OnInit {
           console.log('error', error);
         }
       }
-      console.log('fullChat', fullChat, this.selectedChat);
-      return;
-      if (fullChat) {
-        try {
-          await Promise.all(
-            fullChat.users.map(async (_) => {
-              console.log('sendMessage -> ', _, this.message);
-              await this.api.call('messages.sendMessage', {
-                clear_draft: true,
-                peer: {
-                  _: 'inputPeerUser',
-                  user_id: _.id,
-                  access_hash: _.access_hash,
-                },
-                message: this.message,
-                random_id:
-                  Math.ceil(Math.random() * 0xffffff) +
-                  Math.ceil(Math.random() * 0xffffff),
-              });
-              await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
-              return _;
-            })
-          );
-        } catch (error) {
-        } finally {
-          loading.dismiss();
-        }
-      }
     }
     loading.dismiss();
   }
@@ -236,8 +207,6 @@ export class HomePage implements OnInit {
 
   async initUser() {
     const user = await this.getUser();
-
-    // const phone = '+4915161018772';
     if (!user) {
       const phone = await prompt('Gebe deine Handynummer ein: ');
       const { phone_code_hash } = await this.sendCode(phone);

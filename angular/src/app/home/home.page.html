@@ -34,7 +34,10 @@
         </ion-list-header>
 
         <ion-item *ngFor="let chat of chats">
-          <ion-label>{{chat.title}}</ion-label>
+          <ion-label>
+            <h2>{{chat.title}}</h2>
+            <p>{{chat._}}</p>
+          </ion-label>
           <ion-radio slot="start" [value]="chat"></ion-radio>
         </ion-item>
       </ion-radio-group>
@@ -51,9 +54,13 @@
           <div>Mitglieder</div>
           <div>{{fullChannel?.full_chat?.participants_count}}</div>
           <div>Online</div>
-          <div>{{fullChannel?.full_chat?.online_count}}</div>
+          <div>{{fullChannel?.full_chat?.online_count || 0}}</div>
           <div class="mt-3">
-            <input type="number" [(ngModel)]="count" placeholder="1" />
+            <ion-input
+              type="number"
+              [(ngModel)]="count"
+              placeholder="1"
+            ></ion-input>
             <ion-button
               class="mt-2"
               (click)="getParticipants(count)"
@@ -88,14 +95,20 @@
       </ion-item>
     </ion-list>
 
-    <ion-button class="mt-2" (click)="sendMessageToUsers()">
+    <ion-button
+      [disabled]="participants?.length === 0 || !message"
+      class="mt-2"
+      (click)="sendMessageToUsers()"
+    >
       Send Message to Users in Group
     </ion-button>
   </div>
 </ion-content>
 
 <ion-footer>
-  <ion-toolbar class="px-3 flex items-center justify-end">
-    <ion-button (click)="clear()">Ausloggen</ion-button>
+  <ion-toolbar class="px-3">
+    <ion-buttons slot="end">
+      <ion-button (click)="clear()">Ausloggen</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-footer>
