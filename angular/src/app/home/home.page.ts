@@ -95,7 +95,7 @@ export class HomePage implements OnInit {
               },
               filter: {
                 _: 'channelParticipantsSearch',
-                q: 'B'
+                q: '' // Suche nach ...
               },
               offset: this.participants.length,
               limit: 100,
