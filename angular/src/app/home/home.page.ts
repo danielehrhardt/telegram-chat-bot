@@ -61,6 +61,7 @@ export class HomePage implements OnInit {
     const users = await this.api.call('messages.getAllChats', {
       except_ids: [],
     });
+    console.log('users', users);
 
     const chats = users.chats.filter((_) => _.title.includes(this.groupName));
     this.chats = chats;
@@ -121,6 +122,8 @@ export class HomePage implements OnInit {
     } catch (e) {
       console.log('Too many requests?', e);
     }
+
+    console.log('this.participants', this.participants);
   }
 
   async sendMessageToUsers() {
@@ -131,24 +134,27 @@ export class HomePage implements OnInit {
     try {
       await Promise.all(
         this.participants.map(async (_) => {
-          console.log('sendMessage -> ', _, this.message);
-          try {
-            await this.api.call('messages.sendMessage', {
-              clear_draft: true,
-              peer: {
-                _: 'inputPeerUser',
-                user_id: _.id,
-                access_hash: _.access_hash,
-              },
-              message: this.message,
-              random_id:
-                Math.ceil(Math.random() * 0xffffff) +
-                Math.ceil(Math.random() * 0xffffff),
-            });
-          } catch (error) {
-            console.log('Error sending message', error);
+          const checkMessages = await this.hasChatWithUser(_.id, _.access_hash);
+          if (!checkMessages) {
+            console.log('sendMessage -> ', _, this.message);
+            try {
+              await this.api.call('messages.sendMessage', {
+                clear_draft: true,
+                peer: {
+                  _: 'inputPeerUser',
+                  user_id: _.id,
+                  access_hash: _.access_hash,
+                },
+                message: this.message,
+                random_id:
+                  Math.ceil(Math.random() * 0xffffff) +
+                  Math.ceil(Math.random() * 0xffffff),
+              });
+            } catch (error) {
+              console.log('Error sending message', error);
+            }
+            await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
           }
-          await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
           return _;
         })
       );
@@ -250,6 +256,23 @@ export class HomePage implements OnInit {
       location.reload();
       return null;
     }
+  }
+
+  async hasChatWithUser(user_id, access_hash) {
+    return new Promise(async (resolve) => {
+      try {
+        const user = await this.api.call('users.getFullUser', {
+          id: {
+            _: 'inputUser',
+            user_id: 1469556303,
+            access_hash: 13847946355687055111,
+          },
+        });
+        resolve(true);
+      } catch (error) {
+        resolve(false);
+      }
+    });
   }
 
   sendCode(phone) {
