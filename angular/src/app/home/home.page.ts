@@ -261,11 +261,11 @@ export class HomePage implements OnInit {
   async hasChatWithUser(user_id, access_hash) {
     return new Promise(async (resolve) => {
       try {
-        const user = await this.api.call('users.getFullUser', {
+        await this.api.call('users.getFullUser', {
           id: {
             _: 'inputUser',
-            user_id: 1469556303,
-            access_hash: 13847946355687055111,
+            user_id: user_id,
+            access_hash: access_hash,
           },
         });
         resolve(true);
