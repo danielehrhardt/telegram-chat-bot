@@ -335,18 +335,21 @@ export class HomePage implements OnInit {
     }
   }
 
-  async scrollTo(elm) {
+  scrollTo(elm) {
     const y = elm.el.offsetTop + 400;
 
-    await this.content.scrollToPoint(0, y);
+    this.content.scrollToPoint(0, y);
   }
 
   async handleError(err) {
     if (err?._ === 'mt_rpc_error' && err?.error_message?.match(/FLOOD_WAIT_/)) {
       const wait = Number(err.error_message.match(/\d+/g)[0]);
-      const loading = await this.loadingCtrl.create({ message: `Flood Wait ... ${wait} Sekunden`, duration: wait * 1000 });
+      const loading = await this.loadingCtrl.create({
+        message: `Flood Wait ... ${wait} Sekunden`,
+        duration: wait * 1000,
+      });
       await loading.present();
-      for(let i = 1; i < wait; i++) {
+      for (let i = 1; i < wait; i++) {
         await this.sleep(1000);
         loading.message = `Flood Wait ... ${wait - i} Sekunden`;
       }
