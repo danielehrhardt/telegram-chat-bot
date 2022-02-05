@@ -90,8 +90,8 @@ export class HomePage implements OnInit {
   }
 
   async getParticipants(count = 10, search = '') {
-    if (count >= this.participants.length) {
-      count = this.participants.length;
+    if (count >= this.fullChannel?.full_chat?.participants_count) {
+      count = this.fullChannel?.full_chat?.participants_count;
     }
     const hash =
       Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff);

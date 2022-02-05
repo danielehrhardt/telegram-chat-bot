@@ -59,8 +59,14 @@
             <ion-input
               type="number"
               [(ngModel)]="count"
+              [max]="fullChannel?.full_chat?.online_count"
               placeholder="1"
             ></ion-input>
+            <ion-button
+              (click)="count = fullChannel?.full_chat?.online_count || 1"
+            >
+              >Alle</ion-button
+            >
             <ion-button
               class="mt-2"
               (click)="getParticipants(count)"
