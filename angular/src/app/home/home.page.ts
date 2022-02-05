@@ -61,11 +61,10 @@ export class HomePage implements OnInit {
     const users = await this.api.call('messages.getAllChats', {
       except_ids: [],
     });
-    // console.log('users.chats', users.chats);
 
     const chats = users.chats.filter((_) => _.title.includes(this.groupName));
-    console.log('chats', chats);
     this.chats = chats;
+    console.log('this.chats', this.chats);
   }
 
   async loadChannel() {
@@ -91,7 +90,7 @@ export class HomePage implements OnInit {
   }
 
   async getParticipants(count = 10, search = '') {
-    if (count > this.participants.length) {
+    if (count >= this.participants.length) {
       count = this.participants.length;
     }
     const hash =
