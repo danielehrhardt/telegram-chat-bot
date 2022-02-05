@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Konfiguration</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="p-5">
+  <p>
+    Gehe auf folgende Website:
+    <a href="https://my.telegram.org/apps">https://my.telegram.org/apps</a>
+    erstelle eine neue App und drücke anschließend auf Ok
+  </p>
+
+  <ion-list class="my-3">
+    <ion-item>
+      <ion-label position="floating">api_id</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="dataService.config.api_id"
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">api_hash</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="dataService.config.api_hash"
+      ></ion-input>
+    </ion-item>
+  </ion-list>
+  <div class="p-5"><ion-button (click)="save()">Speichern</ion-button></div>
+</ion-content>

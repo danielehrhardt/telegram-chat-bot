@@ -1,6 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { IonContent, LoadingController, ToastController } from '@ionic/angular';
+import {
+  IonContent,
+  LoadingController,
+  NavController,
+  ToastController,
+} from '@ionic/angular';
 import MTProto from '@mtproto/core/envs/browser';
+import { DataService } from '../data.service';
 
 @Component({
   selector: 'app-home',
@@ -23,7 +29,9 @@ export class HomePage implements OnInit {
 
   constructor(
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private navCtrl: NavController,
+    private dataService: DataService
   ) {}
 
   clear() {
@@ -33,18 +41,12 @@ export class HomePage implements OnInit {
 
   async ngOnInit() {
     try {
-      let api_id = localStorage.getItem('api_id');
-      let api_hash = localStorage.getItem('api_hash');
+      let api_id = this.dataService.config?.api_id;
+      let api_hash = this.dataService.config?.api_hash;
 
       if (!api_id && !api_hash) {
-        await alert(
-          'Gehe auf folgende Website: https://my.telegram.org/apps erstelle eine neue App und drücke anschließend auf Ok'
-        );
-        api_id = await prompt('Kopiere nun die Api ID hier rein: ');
-        localStorage.setItem('api_id', api_id);
-
-        api_hash = await prompt('Kopiere nun die Api Hash hier rein: ');
-        localStorage.setItem('api_hash', api_hash);
+        this.navCtrl.navigateRoot('/config');
+        return;
       }
 
       const loading = await this.loadingCtrl.create({ duration: 5000 });
@@ -258,11 +260,12 @@ export class HomePage implements OnInit {
       const code = await prompt('Gebe den Code von Telegram ein: ');
 
       try {
-        const signInResult = await this.signIn({
+        await this.signIn({
           code,
           phone,
           phone_code_hash,
         });
+        this.initUser();
       } catch (error) {
         await this.handleError(error);
         console.log('error', error);
