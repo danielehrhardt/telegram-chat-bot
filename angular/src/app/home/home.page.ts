@@ -153,7 +153,7 @@ export class HomePage implements OnInit {
         _.loading = true;
         _.status = 'loading';
 
-        const hasChat = await this.hasChatWithUser(_.id, _.access_hash);
+        const hasChat = false; //await this.hasChatWithUser(_.id, _.access_hash);
         console.log('hasChat', hasChat);
         if (!hasChat) {
           console.log('sendMessage -> ', _, this.message);
