@@ -132,18 +132,22 @@ export class HomePage implements OnInit {
       await Promise.all(
         this.participants.map(async (_) => {
           console.log('sendMessage -> ', _, this.message);
-          await this.api.call('messages.sendMessage', {
-            clear_draft: true,
-            peer: {
-              _: 'inputPeerUser',
-              user_id: _.id,
-              access_hash: _.access_hash,
-            },
-            message: this.message,
-            random_id:
-              Math.ceil(Math.random() * 0xffffff) +
-              Math.ceil(Math.random() * 0xffffff),
-          });
+          try {
+            await this.api.call('messages.sendMessage', {
+              clear_draft: true,
+              peer: {
+                _: 'inputPeerUser',
+                user_id: _.id,
+                access_hash: _.access_hash,
+              },
+              message: this.message,
+              random_id:
+                Math.ceil(Math.random() * 0xffffff) +
+                Math.ceil(Math.random() * 0xffffff),
+            });
+          } catch (error) {
+            console.log('Error sending message', error);
+          }
           await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
           return _;
         })
