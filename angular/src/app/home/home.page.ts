@@ -56,12 +56,12 @@ export class HomePage implements OnInit {
       loading.dismiss();
 
       await this.initUser();
+      const result = await this.api.call('help.getNearestDc');
+      this.country = result.country;
     } catch (error) {
+      console.log('ngOnInit error', error);
       this.clear();
     }
-
-    const result = await this.api.call('help.getNearestDc');
-    this.country = result.country;
   }
 
   async findGroup() {
