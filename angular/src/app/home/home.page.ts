@@ -145,33 +145,40 @@ export class HomePage implements OnInit {
     });
     loading.present();
     try {
-      await Promise.all(
-        this.participants.map(async (_) => {
-          const hasChat = await this.hasChatWithUser(_.id, _.access_hash);
-          console.log('hasChat', hasChat);
-          if (!hasChat) {
-            console.log('sendMessage -> ', _, this.message);
-            try {
-              await this.api.call('messages.sendMessage', {
-                clear_draft: true,
-                peer: {
-                  _: 'inputPeerUser',
-                  user_id: _.id,
-                  access_hash: _.access_hash,
-                },
-                message: this.message,
-                random_id:
-                  Math.ceil(Math.random() * 0xffffff) +
-                  Math.ceil(Math.random() * 0xffffff),
-              });
-            } catch (error) {
-              console.log('Error sending message', error);
-            }
-            await this.sleep((Math.floor(Math.random() * 10) + 1) * 1000);
+      await this.asyncForEach(this.participants, async (_) => {
+        _.loading = true;
+        _.status = 'loading';
+
+        const hasChat = await this.hasChatWithUser(_.id, _.access_hash);
+        console.log('hasChat', hasChat);
+        if (!hasChat) {
+          console.log('sendMessage -> ', _, this.message);
+          try {
+            await this.api.call('messages.sendMessage', {
+              clear_draft: true,
+              peer: {
+                _: 'inputPeerUser',
+                user_id: _.id,
+                access_hash: _.access_hash,
+              },
+              message: this.message,
+              random_id:
+                Math.ceil(Math.random() * 0xffffff) +
+                Math.ceil(Math.random() * 0xffffff),
+            });
+            _.status = 'success';
+          } catch (error) {
+            console.log('Error sending message', error);
+            _.status = 'error';
+            _.error = JSON.stringify(error);
           }
-          return _;
-        })
-      );
+          await this.sleep((Math.floor(Math.random() * 10) + 1) * 700);
+        } else {
+          _.status = 'warning';
+          _.error = 'User already in chat';
+        }
+        _.loading = false;
+      });
     } catch (error) {
       console.log('sendMessageToUsers', error);
     } finally {
@@ -304,5 +311,16 @@ export class HomePage implements OnInit {
       phone_number: phone,
       phone_code_hash: phone_code_hash,
     });
+  }
+
+  async asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+  }
+
+  scrollTo(elm) {
+    const y = elm.el.offsetTop;
+    // TODO Scroll to the element
   }
 }

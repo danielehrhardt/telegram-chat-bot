@@ -112,11 +112,44 @@
               <ion-label>Teilnehmer</ion-label>
             </ion-list-header>
 
-            <ion-item *ngFor="let participant of participants">
+            <ion-item *ngFor="let participant of participants" #divRef>
               <ion-label
-                >{{participant.bot ? '[Bot] ' :
-                ''}}{{participant.first_name}}</ion-label
-              >
+                ><h2>
+                  {{participant.bot ? '[Bot] ' : ''}}{{participant.first_name}}
+                </h2>
+
+                <div class="alert alert-danger" *ngIf="participant.error">
+                  <strong>Fehler:</strong> {{participant.error}}
+                </div>
+              </ion-label>
+              <ion-icon
+                slot="end"
+                *ngIf="!participant.status"
+                name="checkmark-circle-outline"
+              ></ion-icon>
+              <ion-icon
+                slot="end"
+                color="success"
+                *ngIf="participant.status === 'success'"
+                name="checkmark-circle"
+              ></ion-icon>
+              <ion-icon
+                slot="end"
+                color="warning"
+                *ngIf="participant.status === 'warning'"
+                name="checkmark-circle"
+              ></ion-icon>
+              <ion-icon
+                slot="end"
+                color="danger"
+                *ngIf="participant.status === 'error'"
+                name="close-circle"
+              ></ion-icon>
+              <ion-spinner
+                name="lines-small"
+                *ngIf="participant.status === 'loading'"
+              ></ion-spinner>
+              {{participant.loading ? scrollTo(divRef) : null}}
             </ion-item>
           </ion-radio-group>
         </ion-list>
