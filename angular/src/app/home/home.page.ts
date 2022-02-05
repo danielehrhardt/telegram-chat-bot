@@ -153,6 +153,7 @@ export class HomePage implements OnInit {
         })
       );
     } catch (error) {
+      console.log('sendMessageToUsers', error);
     } finally {
       loading.dismiss();
     }
