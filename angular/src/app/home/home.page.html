@@ -14,7 +14,7 @@
 </div>
 <div class="flex flex-col h-full overflow-auto py-28">
   <div class="container mx-auto">
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="card shadow-2xl lg:card-side bg-primary text-primary-content">
         <div class="card-body">
           <h2 class="card-title mb-0">Version</h2>
@@ -118,7 +118,10 @@
                   {{participant.bot ? '[Bot] ' : ''}}{{participant.first_name}}
                 </h2>
 
-                <div class="alert alert-danger" *ngIf="participant.error">
+                <div
+                  class="alert alert-danger bg-slate-600"
+                  *ngIf="participant.error"
+                >
                   <strong>Fehler:</strong> {{participant.error}}
                 </div>
               </ion-label>
@@ -137,7 +140,7 @@
                 slot="end"
                 color="warning"
                 *ngIf="participant.status === 'warning'"
-                name="checkmark-circle"
+                name="close-circle"
               ></ion-icon>
               <ion-icon
                 slot="end"
