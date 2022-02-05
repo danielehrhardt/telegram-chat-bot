@@ -147,8 +147,9 @@ export class HomePage implements OnInit {
     try {
       await Promise.all(
         this.participants.map(async (_) => {
-          const checkMessages = await this.hasChatWithUser(_.id, _.access_hash);
-          if (!checkMessages) {
+          const hasChat = await this.hasChatWithUser(_.id, _.access_hash);
+          console.log('hasChat', hasChat);
+          if (!hasChat) {
             console.log('sendMessage -> ', _, this.message);
             try {
               await this.api.call('messages.sendMessage', {
