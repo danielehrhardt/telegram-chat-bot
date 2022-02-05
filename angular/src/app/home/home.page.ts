@@ -34,35 +34,31 @@ export class HomePage implements OnInit {
     let api_id = localStorage.getItem('api_id');
     let api_hash = localStorage.getItem('api_hash');
 
-    try {
-      if (!api_id && !api_hash) {
-        await alert(
-          'Gehe auf folgende Website: https://my.telegram.org/apps erstelle eine neue App und drücke anschließend auf Ok'
-        );
-        api_id = await prompt('Kopiere nun die Api ID hier rein: ');
-        localStorage.setItem('api_id', api_id);
+    if (!api_id && !api_hash) {
+      await alert(
+        'Gehe auf folgende Website: https://my.telegram.org/apps erstelle eine neue App und drücke anschließend auf Ok'
+      );
+      api_id = await prompt('Kopiere nun die Api ID hier rein: ');
+      localStorage.setItem('api_id', api_id);
 
-        api_hash = await prompt('Kopiere nun die Api Hash hier rein: ');
-        localStorage.setItem('api_hash', api_hash);
-      }
-
-      const loading = await this.loadingCtrl.create({ duration: 5000 });
-      loading.present();
-
-      this.api = new MTProto({
-        api_id,
-        api_hash,
-      });
-
-      const result = await this.api.call('help.getNearestDc');
-      this.country = result.country;
-
-      loading.dismiss();
-
-      await this.initUser();
-    } catch (error) {
-      this.clear();
+      api_hash = await prompt('Kopiere nun die Api Hash hier rein: ');
+      localStorage.setItem('api_hash', api_hash);
     }
+
+    const loading = await this.loadingCtrl.create({ duration: 5000 });
+    loading.present();
+
+    this.api = new MTProto({
+      api_id,
+      api_hash,
+    });
+
+    const result = await this.api.call('help.getNearestDc');
+    this.country = result.country;
+
+    loading.dismiss();
+
+    await this.initUser();
   }
 
   async findGroup() {
