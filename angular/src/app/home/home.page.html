@@ -1,172 +1,188 @@
-<div class="fixed p-5 w-full z-50">
-  <div
-    class="navbar mb-2 shadow-lg bg-neutral text-neutral-content rounded-box"
-  >
-    <div class="flex-1 px-2 mx-2">
-      <span class="text-lg font-bold"> Telegram Message Tool </span>
-    </div>
-    <div class="flex-none">
-      <button (click)="clear()" class="btn btn-ghost btn-sm rounded-btn">
-        Ausloggen
-      </button>
-    </div>
-  </div>
-</div>
-<div class="flex flex-col h-full overflow-auto py-28">
-  <div class="container mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="card shadow-2xl lg:card-side bg-primary text-primary-content">
-        <div class="card-body">
-          <h2 class="card-title mb-0">Version</h2>
-          <p>v1</p>
-        </div>
+<ion-content>
+  <div class="fixed p-5 w-full z-50">
+    <div
+      class="navbar mb-2 shadow-lg bg-neutral text-neutral-content rounded-box"
+    >
+      <div class="flex-1 px-2 mx-2">
+        <span class="text-lg font-bold"> Telegram Message Tool </span>
       </div>
-      <div class="card shadow-2xl lg:card-side bg-primary text-primary-content">
-        <div class="card-body">
-          <h2 class="card-title mb-0">Land</h2>
-          <p>{{country}}</p>
-        </div>
-      </div>
-      <div class="card shadow-2xl lg:card-side bg-primary text-primary-content">
-        <div class="card-body">
-          <h2 class="card-title mb-0">Benutzer</h2>
-          <p>{{user?.user?.first_name}} {{user?.user?.last_name}}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="card shadow-2xl mt-10 bg-base-200" style="background: #1a1a1a">
-      <div class="card-body">
-        <ion-item class="mb-10">
-          <ion-label position="floating">Nachricht</ion-label>
-          <ion-textarea [(ngModel)]="message"></ion-textarea>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Gruppenname</ion-label>
-          <ion-input [(ngModel)]="groupName"></ion-input>
-        </ion-item>
-        <button class="btn mt-2" [disabled]="!groupName" (click)="findGroup()">
-          Gruppe finden
+      <div class="flex-none">
+        <button (click)="clear()" class="btn btn-ghost btn-sm rounded-btn">
+          Ausloggen
         </button>
-
-        <ion-list *ngIf="chats?.length > 0">
-          <ion-radio-group
-            [(ngModel)]="selectedChat"
-            (ngModelChange)="loadChannel()"
-          >
-            <ion-list-header>
-              <ion-label>Gruppen</ion-label>
-            </ion-list-header>
-
-            <ion-item *ngFor="let chat of chats">
-              <ion-label>
-                <h2>{{chat.title}}</h2>
-                <p>{{chat._}}</p>
-              </ion-label>
-              <ion-radio slot="start" [value]="chat"></ion-radio>
-            </ion-item>
-          </ion-radio-group>
-        </ion-list>
-
-        <ng-container *ngIf="fullChannel && selectedChat">
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title> {{selectedChat?.title}} </ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <div>About</div>
-              <div>{{fullChannel?.full_chat?.about}}</div>
-              <div>Mitglieder</div>
-              <div>{{fullChannel?.full_chat?.participants_count}}</div>
-              <div>Online</div>
-              <div>{{fullChannel?.full_chat?.online_count || 0}}</div>
-              <div class="mt-3">
-                <ion-input
-                  type="number"
-                  [(ngModel)]="count"
-                  [max]="fullChannel?.full_chat?.participants_count"
-                  placeholder="1"
-                ></ion-input>
-                <button
-                  class="btn mr-5"
-                  (click)="count = fullChannel?.full_chat?.participants_count"
-                >
-                  Alle
-                </button>
-                <button
-                  class="btn mt-2"
-                  (click)="getParticipants(count)"
-                  [disabled]="!selectedChat?.id"
-                >
-                  Teilnehmer finden
-                </button>
-              </div>
-            </ion-card-content>
-          </ion-card>
-        </ng-container>
-
-        <ion-list *ngIf="participants?.length > 0">
-          <ion-radio-group>
-            <ion-list-header>
-              <ion-label>Teilnehmer</ion-label>
-            </ion-list-header>
-
-            <ion-item *ngFor="let participant of participants" #divRef>
-              <ion-label
-                ><h2>
-                  {{participant.bot ? '[Bot] ' : ''}}{{participant.first_name}}
-                </h2>
-
-                <div
-                  class="alert alert-danger bg-slate-600"
-                  *ngIf="participant.error"
-                >
-                  <strong>Fehler:</strong> {{participant.error}}
-                </div>
-              </ion-label>
-              <ion-icon
-                slot="end"
-                *ngIf="!participant.status"
-                name="checkmark-circle-outline"
-              ></ion-icon>
-              <ion-icon
-                slot="end"
-                color="success"
-                *ngIf="participant.status === 'success'"
-                name="checkmark-circle"
-              ></ion-icon>
-              <ion-icon
-                slot="end"
-                color="warning"
-                *ngIf="participant.status === 'warning'"
-                name="close-circle"
-              ></ion-icon>
-              <ion-icon
-                slot="end"
-                color="danger"
-                *ngIf="participant.status === 'error'"
-                name="close-circle"
-              ></ion-icon>
-              <ion-spinner
-                name="lines-small"
-                *ngIf="participant.status === 'loading'"
-              ></ion-spinner>
-              {{participant.loading ? scrollTo(divRef) : null}}
-            </ion-item>
-          </ion-radio-group>
-        </ion-list>
-
-        <ng-container *ngIf="participants?.length > 0">
-          <button
-            [disabled]="participants?.length === 0 || !message"
-            class="btn mt-2"
-            (click)="sendMessageToUsers()"
-          >
-            Send Message to Users in Group
-          </button>
-        </ng-container>
       </div>
     </div>
   </div>
-</div>
+  <div class="flex flex-col h-full py-28">
+    <div class="container mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div
+          class="card shadow-2xl lg:card-side bg-primary text-primary-content"
+        >
+          <div class="card-body">
+            <h2 class="card-title mb-0">Version</h2>
+            <p>v1</p>
+          </div>
+        </div>
+        <div
+          class="card shadow-2xl lg:card-side bg-primary text-primary-content"
+        >
+          <div class="card-body">
+            <h2 class="card-title mb-0">Land</h2>
+            <p>{{country}}</p>
+          </div>
+        </div>
+        <div
+          class="card shadow-2xl lg:card-side bg-primary text-primary-content"
+        >
+          <div class="card-body">
+            <h2 class="card-title mb-0">Benutzer</h2>
+            <p>{{user?.user?.first_name}} {{user?.user?.last_name}}</p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card shadow-2xl mt-10 bg-base-200"
+        style="background: #1a1a1a"
+      >
+        <div class="card-body">
+          <ion-item class="mb-10">
+            <ion-label position="floating">Nachricht</ion-label>
+            <ion-textarea [(ngModel)]="message"></ion-textarea>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Gruppenname</ion-label>
+            <ion-input [(ngModel)]="groupName"></ion-input>
+          </ion-item>
+          <button
+            class="btn mt-2"
+            [disabled]="!groupName"
+            (click)="findGroup()"
+          >
+            Gruppe finden
+          </button>
+
+          <ion-list *ngIf="chats?.length > 0">
+            <ion-radio-group
+              [(ngModel)]="selectedChat"
+              (ngModelChange)="loadChannel()"
+            >
+              <ion-list-header>
+                <ion-label>Gruppen</ion-label>
+              </ion-list-header>
+
+              <ion-item *ngFor="let chat of chats">
+                <ion-label>
+                  <h2>{{chat.title}}</h2>
+                  <p>{{chat._}}</p>
+                </ion-label>
+                <ion-radio slot="start" [value]="chat"></ion-radio>
+              </ion-item>
+            </ion-radio-group>
+          </ion-list>
+
+          <ng-container *ngIf="fullChannel && selectedChat">
+            <ion-card>
+              <ion-card-header>
+                <ion-card-title> {{selectedChat?.title}} </ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <div>About</div>
+                <div>{{fullChannel?.full_chat?.about}}</div>
+                <div>Mitglieder</div>
+                <div>{{fullChannel?.full_chat?.participants_count}}</div>
+                <div>Online</div>
+                <div>{{fullChannel?.full_chat?.online_count || 0}}</div>
+                <div class="mt-3">
+                  <ion-input
+                    type="number"
+                    [(ngModel)]="count"
+                    [max]="fullChannel?.full_chat?.participants_count"
+                    placeholder="1"
+                  ></ion-input>
+                  <button
+                    class="btn mr-5"
+                    (click)="count = fullChannel?.full_chat?.participants_count"
+                  >
+                    Alle
+                  </button>
+                  <button
+                    class="btn mt-2"
+                    (click)="getParticipants(count)"
+                    [disabled]="!selectedChat?.id"
+                  >
+                    Teilnehmer finden
+                  </button>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ng-container>
+
+          <ion-list *ngIf="participants?.length > 0">
+            <ion-radio-group>
+              <ion-list-header>
+                <ion-label>Teilnehmer</ion-label>
+              </ion-list-header>
+
+              <ion-item *ngFor="let participant of participants" #divRef>
+                <ion-label
+                  ><h2>
+                    {{participant.bot ? '[Bot] ' :
+                    ''}}{{participant.first_name}}
+                  </h2>
+
+                  <div
+                    class="alert alert-danger bg-slate-600"
+                    *ngIf="participant.error"
+                  >
+                    <strong>Fehler:</strong> {{participant.error}}
+                  </div>
+                </ion-label>
+                <ion-icon
+                  slot="end"
+                  *ngIf="!participant.status"
+                  name="checkmark-circle-outline"
+                ></ion-icon>
+                <ion-icon
+                  slot="end"
+                  color="success"
+                  *ngIf="participant.status === 'success'"
+                  name="checkmark-circle"
+                ></ion-icon>
+                <ion-icon
+                  slot="end"
+                  color="warning"
+                  *ngIf="participant.status === 'warning'"
+                  name="close-circle"
+                ></ion-icon>
+                <ion-icon
+                  slot="end"
+                  color="danger"
+                  *ngIf="participant.status === 'error'"
+                  name="close-circle"
+                ></ion-icon>
+                <ion-spinner
+                  name="lines-small"
+                  *ngIf="participant.status === 'loading'"
+                ></ion-spinner>
+                {{participant.loading ? scrollTo(divRef) : null}}
+              </ion-item>
+            </ion-radio-group>
+          </ion-list>
+
+          <ng-container *ngIf="participants?.length > 0">
+            <button
+              [disabled]="participants?.length === 0 || !message"
+              class="btn mt-2"
+              (click)="sendMessageToUsers()"
+            >
+              Send Message to Users in Group
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { LoadingController, ToastController } from '@ionic/angular';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { IonContent, LoadingController, ToastController } from '@ionic/angular';
 import MTProto from '@mtproto/core/envs/browser';
 
 @Component({
@@ -8,6 +8,7 @@ import MTProto from '@mtproto/core/envs/browser';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
+  @ViewChild(IonContent) content: IonContent;
   api;
   user;
   country: string;
@@ -147,18 +148,18 @@ export class HomePage implements OnInit {
     const loading = await this.loadingCtrl.create({
       message: 'Sending messages...',
     });
-    loading.present();
+    // loading.present();
     try {
       await this.asyncForEach(this.participants, async (_) => {
         _.loading = true;
         _.status = 'loading';
 
-        const hasChat = false; //await this.hasChatWithUser(_.id, _.access_hash);
+        const hasChat = await this.hasChatWithUser(_.id, _.access_hash);
         console.log('hasChat', hasChat);
         if (!hasChat) {
           console.log('sendMessage -> ', _, this.message);
           try {
-            await this.api.call('messages.sendMessage', {
+            /*await this.api.call('messages.sendMessage', {
               clear_draft: true,
               peer: {
                 _: 'inputPeerUser',
@@ -169,14 +170,14 @@ export class HomePage implements OnInit {
               random_id:
                 Math.ceil(Math.random() * 0xffffff) +
                 Math.ceil(Math.random() * 0xffffff),
-            });
+            });*/
             _.status = 'success';
           } catch (error) {
             console.log('Error sending message', error);
             _.status = 'error';
             _.error = JSON.stringify(error);
           }
-          await this.sleep((Math.floor(Math.random() * 10) + 1) * 1000);
+          // await this.sleep((Math.floor(Math.random() * 10) + 1) * 1000);
         } else {
           _.status = 'warning';
           _.error = 'User already in chat';
@@ -280,14 +281,19 @@ export class HomePage implements OnInit {
   async hasChatWithUser(user_id, access_hash) {
     return new Promise(async (resolve) => {
       try {
-        await this.api.call('users.getFullUser', {
+        const user = await this.api.call('users.getFullUser', {
           id: {
             _: 'inputUser',
             user_id: user_id,
             access_hash: access_hash,
           },
         });
-        resolve(true);
+        console.log('user', user);
+        if (user.common_chats_count > 1) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
       } catch (error) {
         resolve(false);
       }
@@ -316,9 +322,9 @@ export class HomePage implements OnInit {
       await callback(array[index], index, array);
     }
   }
-
   scrollTo(elm) {
-    const y = elm.el.offsetTop;
-    // TODO Scroll to the element
+    const y = elm.el.offsetTop + 400;
+
+    this.content.scrollToPoint(0, y);
   }
 }
