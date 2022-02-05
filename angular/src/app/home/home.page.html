@@ -28,9 +28,10 @@
       <ion-label position="floating">Gruppenname</ion-label>
       <ion-input [(ngModel)]="groupName"></ion-input>
     </ion-item>
-    <ion-button class="mt-2" (click)="findGroup()"> Gruppe findene </ion-button>
+    <ion-button class="mt-2" (click)="findGroup()"> Gruppe finden </ion-button>
 
-    {{selectedChat}}
+    {{selectedChat | json}}
+
     <ion-list *ngIf="chats?.length > 0">
       <ion-radio-group [(ngModel)]="selectedChat">
         <ion-list-header>
@@ -40,6 +41,19 @@
         <ion-item *ngFor="let chat of chats">
           <ion-label>{{chat.title}}</ion-label>
           <ion-radio slot="start" [value]="chat"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+
+    <ion-button class="mt-2" (click)="getParticipants()" [disabled]="!selectedChat?.id"> Teilnehmer finden </ion-button>
+    <ion-list *ngIf="participants?.length > 0">
+      <ion-radio-group>
+        <ion-list-header>
+          <ion-label>Teilnehmer</ion-label>
+        </ion-list-header>
+
+        <ion-item *ngFor="let participant of participants">
+          <ion-label>{{participant.bot ? '[Bot] ' : ''}}{{participant.first_name}}</ion-label>
         </ion-item>
       </ion-radio-group>
     </ion-list>

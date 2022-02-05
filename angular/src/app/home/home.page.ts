@@ -15,6 +15,7 @@ export class HomePage implements OnInit {
   message;
   chats;
   selectedChat;
+  participants;
 
   constructor(private loadingCtrl: LoadingController) {}
 
@@ -65,6 +66,60 @@ export class HomePage implements OnInit {
     this.chats = chats;
   }
 
+  async getParticipants() {
+    if (this.selectedChat._ == 'chat') {
+      this.participants = (await this.api.call('messages.getFullChat', {
+        chat_id: this.selectedChat.id,
+        access_hash: this.selectedChat.access_hash,
+      })).users;
+    } else if (this.selectedChat._ == 'channel') {
+      try {
+        const fullChat = await this.api.call('channels.getFullChannel', {
+            channel: {
+              _: 'inputChannel',
+              channel_id: this.selectedChat.id,
+              access_hash: this.selectedChat.access_hash,
+            }
+          });
+        const hash = Math.ceil(Math.random() * 0xffffff) +
+          Math.ceil(Math.random() * 0xffffff);
+        this.participants = [];
+        try {
+          for (let counter = 1; this.participants.length < counter;) {
+            console.log('Search', counter, this.participants.length);
+            let participants = await this.api.call('channels.getParticipants', {
+              channel: {
+                _: 'inputChannel',
+                channel_id: this.selectedChat.id,
+                access_hash: this.selectedChat.access_hash,
+              },
+              filter: {
+                _: 'channelParticipantsSearch',
+                q: 'B'
+              },
+              offset: this.participants.length,
+              limit: 100,
+              hash
+            });
+            if (counter === 1) {
+              counter = participants.count;
+            }
+            participants.users.forEach(u => this.participants.push(u));
+          }
+        } catch (e) { console.log('Too many requests?', e); }
+        // this.participants = (await this.api.call('channels.getFullChannel', {
+        //   channel: {
+        //     _: 'inputChannel',
+        //     channel_id: this.selectedChat.id,
+        //     access_hash: this.selectedChat.access_hash,
+        //   }
+        // })).users;
+      } catch (error) {
+        console.log('error', error);
+      }
+    }
+  }
+
   async sendMessageToGroup() {
     const loading = await this.loadingCtrl.create({
       message: 'Sending messages...',
@@ -80,14 +135,14 @@ export class HomePage implements OnInit {
       }
 
       if (this.selectedChat._ == 'channel') {
-        const config = {
-          _: 'inputChannel',
-          channel_id: this.selectedChat.id,
-          access_hash: this.selectedChat.access_hash,
-        };
-        console.log('getFullChannel', this.selectedChat, config);
         try {
-          fullChat = await this.api.call('channels.getFullChannel', config);
+          fullChat = await this.api.call('channels.getFullChannel', {
+            channel: {
+              _: 'inputChannel',
+              channel_id: this.selectedChat.id,
+              access_hash: this.selectedChat.access_hash,
+            }
+          });
         } catch (error) {
           console.log('error', error);
         }
