@@ -254,13 +254,8 @@ export class HomePage implements OnInit {
           phone_code_hash,
         });
       } catch (error) {
-        if (error.error_message !== 'SESSION_PASSWORD_NEEDED') {
-          console.log(`error:`, error);
-
-          return;
-        }
+        console.log('error', error);
       }
-      location.reload();
     } else {
       this.user = user;
       console.log('user:', user);
