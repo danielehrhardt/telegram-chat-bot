@@ -1,6 +1,9 @@
 ion-list {
   @apply rounded-lg overflow-hidden mb-3 mt-3;
 }
+ion-item {
+  @apply rounded-lg overflow-hidden;
+}
 ion-card {
   @apply m-0 rounded-lg overflow-hidden  mb-3;
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController, ToastController } from '@ionic/angular';
 import MTProto from '@mtproto/core/envs/browser';
 
 @Component({
@@ -19,7 +19,10 @@ export class HomePage implements OnInit {
   count;
   fullChannel;
 
-  constructor(private loadingCtrl: LoadingController) {}
+  constructor(
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController
+  ) {}
 
   clear() {
     localStorage.removeItem('api_id');
@@ -58,14 +61,23 @@ export class HomePage implements OnInit {
   }
 
   async findGroup() {
-    const users = await this.api.call('messages.getAllChats', {
-      except_ids: [],
-    });
-    console.log('users', users);
+    try {
+      const users = await this.api.call('messages.getAllChats', {
+        except_ids: [],
+      });
+      console.log('users', users);
 
-    const chats = users.chats.filter((_) => _.title.includes(this.groupName));
-    this.chats = chats;
-    console.log('this.chats', this.chats);
+      const chats = users.chats.filter((_) => _.title.includes(this.groupName));
+      this.chats = chats;
+      console.log('this.chats', this.chats);
+    } catch (error) {
+      console.log('findGroup', error);
+      let toast = await this.toastCtrl.create({
+        message: error.message,
+        duration: 3000,
+      });
+      toast.present();
+    }
   }
 
   async loadChannel() {
@@ -153,7 +165,7 @@ export class HomePage implements OnInit {
             } catch (error) {
               console.log('Error sending message', error);
             }
-            await this.sleep((Math.floor(Math.random() * 10) + 1) * 100);
+            await this.sleep((Math.floor(Math.random() * 10) + 1) * 1000);
           }
           return _;
         })
