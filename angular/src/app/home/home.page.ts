@@ -26,6 +26,7 @@ export class HomePage implements OnInit {
   participants = [];
   count;
   fullChannel;
+  messageQueue = [];
 
   constructor(
     private loadingCtrl: LoadingController,
@@ -76,8 +77,7 @@ export class HomePage implements OnInit {
       });
       console.log('users', users);
 
-      const chats = users.chats.filter((_) => _.title.includes(this.groupName));
-      this.chats = chats;
+      this.chats = users.chats.filter((_) => _.title.includes(this.groupName));
       console.log('this.chats', this.chats);
     } catch (error) {
       await this.handleError(error);
@@ -101,14 +101,13 @@ export class HomePage implements OnInit {
       this.participants = fullChat.users;
     }
     if (this.selectedChat._ == 'channel') {
-      const fullChannel = await this.api.call('channels.getFullChannel', {
+      this.fullChannel = await this.api.call('channels.getFullChannel', {
         channel: {
           _: 'inputChannel',
           channel_id: this.selectedChat.id,
           access_hash: this.selectedChat.access_hash,
         },
       });
-      this.fullChannel = fullChannel;
     }
   }
 
@@ -149,8 +148,8 @@ export class HomePage implements OnInit {
     console.log('this.participants', this.participants);
   }
 
-  async sendMessageToUsers() {
-    console.log(this.participants);
+  async sendMessageToUsers(users = null) {
+    console.log(users || this.participants);
     if (+this.messagesPerMinute < 1) {
       return alert('Bitte mindestens 1 Nachricht pro Minute versenden!');
     }
@@ -159,7 +158,7 @@ export class HomePage implements OnInit {
     });
     // loading.present();
     try {
-      await this.asyncForEach(this.participants, async (_) => {
+      await this.asyncForEach(users || this.participants, async (_) => {
         _.loading = true;
         _.status = 'loading';
 
@@ -168,7 +167,7 @@ export class HomePage implements OnInit {
         if (!hasChat) {
           console.log('sendMessage -> ', _, this.message);
           try {
-            /*await this.api.call('messages.sendMessage', {
+            await this.api.call('messages.sendMessage', {
               clear_draft: true,
               peer: {
                 _: 'inputPeerUser',
@@ -179,12 +178,16 @@ export class HomePage implements OnInit {
               random_id:
                 Math.ceil(Math.random() * 0xffffff) +
                 Math.ceil(Math.random() * 0xffffff),
-            });*/
+            });
             _.status = 'success';
+            if (this.messageQueue.indexOf(_) >= 0) {
+              this.messageQueue.splice(this.messageQueue.indexOf(_), 1);
+            }
           } catch (error) {
             console.log('Error sending message', error);
             _.status = 'error';
             _.error = JSON.stringify(error);
+            this.messageQueue.push(_);
           }
           await this.sleep(60_000 / +this.messagesPerMinute);
         } else {
@@ -198,6 +201,9 @@ export class HomePage implements OnInit {
       console.log('sendMessageToUsers', error);
     } finally {
       loading.dismiss();
+    }
+    if (this.messageQueue.length > 0) {
+      this.sendMessageToUsers([...this.messageQueue]);
     }
   }
 

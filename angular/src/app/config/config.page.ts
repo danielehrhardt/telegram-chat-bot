@@ -13,7 +13,14 @@ export class ConfigPage implements OnInit {
     private navCtrl: NavController
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    if (localStorage.getItem('api_id')) {
+      this.dataService.config.api_id = localStorage.getItem('api_id');
+    }
+    if (localStorage.getItem('api_hash')) {
+      this.dataService.config.api_hash = localStorage.getItem('api_hash');
+    }
+  }
 
   save() {
     localStorage.setItem('config', JSON.stringify(this.dataService.config));
