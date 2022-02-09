@@ -27,6 +27,8 @@ export class HomePage implements OnInit {
   count;
   fullChannel;
   messageQueue = [];
+  checkUser: boolean = true;
+  replaceStrings: boolean = true;
 
   constructor(
     private loadingCtrl: LoadingController,
@@ -161,11 +163,18 @@ export class HomePage implements OnInit {
       await this.asyncForEach(users || this.participants, async (_) => {
         _.loading = true;
         _.status = 'loading';
+        let message = this.message;
 
-        const hasChat = await this.hasChatWithUser(_.id, _.access_hash);
-        console.log('hasChat', hasChat);
+        if (this.replaceStrings) {
+          message = message.replace(/(\(name\))/g, _.first_name);
+        }
+
+        let hasChat;
+        this.checkUser
+          ? (hasChat = await this.hasChatWithUser(_.id, _.access_hash))
+          : (hasChat = false);
         if (!hasChat) {
-          console.log('sendMessage -> ', _, this.message);
+          console.log('sendMessage -> ', _, message);
           try {
             await this.api.call('messages.sendMessage', {
               clear_draft: true,
@@ -174,7 +183,7 @@ export class HomePage implements OnInit {
                 user_id: _.id,
                 access_hash: _.access_hash,
               },
-              message: this.message,
+              message: message,
               random_id:
                 Math.ceil(Math.random() * 0xffffff) +
                 Math.ceil(Math.random() * 0xffffff),
@@ -298,7 +307,17 @@ export class HomePage implements OnInit {
     }
   }
 
-  async hasChatWithUser(user_id, access_hash) {
+  async getFullUser(user_id, access_hash) {
+    return await this.api.call('users.getFullUser', {
+      id: {
+        _: 'inputUser',
+        user_id: user_id,
+        access_hash: access_hash,
+      },
+    });
+  }
+
+  async hasChatWithUser(user_id, access_hash): Promise<boolean> {
     return new Promise(async (resolve) => {
       try {
         const user = await this.api.call('users.getFullUser', {

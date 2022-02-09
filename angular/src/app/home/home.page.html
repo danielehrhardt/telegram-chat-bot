@@ -53,8 +53,13 @@
           </ion-item>
 
           <ion-item class="mb-10">
-            <ion-label position="floating">Wie viele Nachrichten pro Minute?</ion-label>
-            <ion-input type="number" [(ngModel)]="messagesPerMinute"></ion-input>
+            <ion-label position="floating"
+              >Wie viele Nachrichten pro Minute?</ion-label
+            >
+            <ion-input
+              type="number"
+              [(ngModel)]="messagesPerMinute"
+            ></ion-input>
           </ion-item>
 
           <ion-item>
@@ -65,7 +70,6 @@
             class="btn mt-2"
             [disabled]="!groupName"
             (click)="findGroup()"
-            style="color: #fff"
           >
             Gruppe finden
           </button>
@@ -127,55 +131,76 @@
           </ng-container>
 
           <ion-list *ngIf="participants?.length > 0">
-            <ion-radio-group>
-              <ion-list-header>
-                <ion-label>Teilnehmer</ion-label>
-              </ion-list-header>
+            <ion-list-header>
+              <ion-label>Teilnehmer</ion-label>
+            </ion-list-header>
 
-              <ion-item *ngFor="let participant of participants" #divRef>
-                <ion-label
-                  ><h2>
-                    {{participant.bot ? '[Bot] ' :
-                    ''}}{{participant.first_name}}
-                  </h2>
+            <ion-item *ngFor="let participant of participants" #divRef>
+              <ion-label
+                ><h2>
+                  {{participant.bot ? '[Bot] ' : ''}}{{participant.first_name}}
+                </h2>
 
-                  <div
-                    class="alert alert-danger bg-slate-600"
-                    *ngIf="participant.error"
-                  >
-                    <strong>Fehler:</strong> {{participant.error}}
-                  </div>
-                </ion-label>
-                <ion-icon
-                  slot="end"
-                  *ngIf="!participant.status"
-                  name="checkmark-circle-outline"
-                ></ion-icon>
-                <ion-icon
-                  slot="end"
-                  color="success"
-                  *ngIf="participant.status === 'success'"
-                  name="checkmark-circle"
-                ></ion-icon>
-                <ion-icon
-                  slot="end"
-                  color="warning"
-                  *ngIf="participant.status === 'warning'"
-                  name="close-circle"
-                ></ion-icon>
-                <ion-icon
-                  slot="end"
-                  color="danger"
-                  *ngIf="participant.status === 'error'"
-                  name="close-circle"
-                ></ion-icon>
-                <ion-spinner
-                  name="lines-small"
-                  *ngIf="participant.status === 'loading'"
-                ></ion-spinner>
-                {{participant.loading ? scrollTo(divRef) : null}}
-              </ion-item>
-            </ion-radio-group>
+                <div
+                  class="alert alert-danger bg-slate-600"
+                  *ngIf="participant.error"
+                >
+                  <strong>Fehler:</strong> {{participant.error}}
+                </div>
+              </ion-label>
+              <ion-icon
+                slot="end"
+                *ngIf="!participant.status"
+                name="checkmark-circle-outline"
+              ></ion-icon>
+              <ion-icon
+                slot="end"
+                color="success"
+                *ngIf="participant.status === 'success'"
+                name="checkmark-circle"
+              ></ion-icon>
+              <ion-icon
+                slot="end"
+                color="warning"
+                *ngIf="participant.status === 'warning'"
+                name="close-circle"
+              ></ion-icon>
+              <ion-icon
+                slot="end"
+                color="danger"
+                *ngIf="participant.status === 'error'"
+                name="close-circle"
+              ></ion-icon>
+              <ion-spinner
+                name="lines-small"
+                *ngIf="participant.status === 'loading'"
+              ></ion-spinner>
+              {{participant.loading ? scrollTo(divRef) : null}}
+            </ion-item>
+          </ion-list>
+
+          <ion-list>
+            <ion-list-header>
+              <ion-label>Einstellungen</ion-label>
+            </ion-list-header>
+
+            <ion-item>
+              <ion-label
+                ><h2>Check if Chat already exist</h2>
+                <p>If yes skip message</p></ion-label
+              >
+              <ion-toggle [(ngModel)]="checkUser"></ion-toggle>
+            </ion-item>
+            <ion-item>
+              <ion-label
+                ><h2>Replace Name</h2>
+                <p>
+                  Check if a variable is in the message and replace the
+                  variable. (name)
+                </p></ion-label
+              >
+              <ion-toggle [(ngModel)]="replaceStrings"></ion-toggle>
+            </ion-item>
           </ion-list>
 
           <ng-container *ngIf="participants?.length">
