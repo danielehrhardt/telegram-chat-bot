@@ -101,6 +101,7 @@ export class HomePage implements OnInit {
         access_hash: this.selectedChat.access_hash,
       });
       this.participants = fullChat.users;
+      console.log('this.participants', this.participants);
     }
     if (this.selectedChat._ == 'channel') {
       this.fullChannel = await this.api.call('channels.getFullChannel', {
@@ -354,6 +355,7 @@ export class HomePage implements OnInit {
       phone_code: code,
       phone_number: phone,
       phone_code_hash: phone_code_hash,
+
     });
   }
 
