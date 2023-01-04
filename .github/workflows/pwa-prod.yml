@@ -2,16 +2,13 @@ name: PWA Deploy
 
 on: [push]
 
-defaults:
-  run:
-    working-directory: ./angular
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16
       - name: Install dependencies
@@ -24,5 +21,5 @@ jobs:
           server: server01.codext.de
           username: ${{ secrets.ftp_user }}
           password: ${{ secrets.ftp_password }}
-          local-dir: ./angular/www/
+          local-dir: ./www/
           server-dir: ./
